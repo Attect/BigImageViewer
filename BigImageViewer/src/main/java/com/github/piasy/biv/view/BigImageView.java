@@ -402,6 +402,10 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
         showImage(Uri.EMPTY, uri);
     }
 
+    public void showImage(Uri uri, HashMap<String, String> headers) {
+        showImage(Uri.EMPTY, uri, headers);
+    }
+
     public void showImage(final Uri thumbnail, final Uri uri) {
         showImage(thumbnail, uri, new HashMap<String, String>());
     }
