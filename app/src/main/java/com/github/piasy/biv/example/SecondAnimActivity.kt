@@ -155,7 +155,7 @@ class SecondAnimActivity : AppCompatActivity() {
             }
         })
 
-        biv.showImage(thumbUrl.toUri(), sourceUrl.toUri(), true)
+        biv.showImage(thumbUrl.toUri(), sourceUrl.toUri(), hashMapOf(),true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
