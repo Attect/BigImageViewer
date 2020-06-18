@@ -25,8 +25,11 @@
 package com.github.piasy.biv.loader;
 
 import android.net.Uri;
+
 import androidx.annotation.UiThread;
+
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by Piasy{github.com/Piasy} on 08/11/2016.
@@ -34,9 +37,9 @@ import java.io.File;
 
 public interface ImageLoader {
 
-    void loadImage(int requestId, Uri uri, Callback callback);
+    void loadImage(int requestId, Uri uri, HashMap<String, String> headers, Callback callback);
 
-    void prefetch(Uri uri);
+    void prefetch(Uri uri, HashMap<String, String> headers);
 
     void cancel(int requestId);
 

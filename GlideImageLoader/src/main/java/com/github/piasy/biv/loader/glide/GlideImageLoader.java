@@ -27,19 +27,24 @@ package com.github.piasy.biv.loader.glide;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.util.Log;
+
 import androidx.annotation.NonNull;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.metadata.ImageInfoExtractor;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -65,12 +70,12 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @Override
-    public void loadImage(final int requestId, final Uri uri, final Callback callback) {
+    public void loadImage(final int requestId, final Uri uri, final HashMap<String, String> headers, final Callback callback) {
         final boolean[] cacheMissed = new boolean[1];
         ImageDownloadTarget target = new ImageDownloadTarget(uri.toString()) {
             @Override
             public void onResourceReady(@NonNull File resource,
-                    Transition<? super File> transition) {
+                                        Transition<? super File> transition) {
                 super.onResourceReady(resource, transition);
                 if (cacheMissed[0]) {
                     callback.onCacheMiss(ImageInfoExtractor.getImageType(resource), resource);
@@ -105,12 +110,12 @@ public class GlideImageLoader implements ImageLoader {
         cancel(requestId);
         rememberTarget(requestId, target);
 
-        downloadImageInto(uri, target);
+        downloadImageInto(uri, headers, target);
     }
 
     @Override
-    public void prefetch(Uri uri) {
-        downloadImageInto(uri, new PrefetchTarget());
+    public void prefetch(Uri uri, HashMap<String, String> headers) {
+        downloadImageInto(uri, headers, new PrefetchTarget());
     }
 
     @Override
@@ -126,10 +131,16 @@ public class GlideImageLoader implements ImageLoader {
         }
     }
 
-    protected void downloadImageInto(Uri uri, Target<File> target) {
+    protected void downloadImageInto(Uri uri, final HashMap<String, String> headers, Target<File> target) {
+        Headers requestHeaders = new Headers() {
+            @Override
+            public Map<String, String> getHeaders() {
+                return headers;
+            }
+        };
         mRequestManager
                 .downloadOnly()
-                .load(uri)
+                .load(new GlideUrl(uri.toString(), requestHeaders))
                 .into(target);
     }
 

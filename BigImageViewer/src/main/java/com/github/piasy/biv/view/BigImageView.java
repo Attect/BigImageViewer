@@ -44,10 +44,12 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
 import androidx.annotation.Keep;
 import androidx.annotation.RequiresPermission;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
+
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.R;
@@ -57,10 +59,12 @@ import com.github.piasy.biv.metadata.ImageInfoExtractor;
 import com.github.piasy.biv.utils.DisplayOptimizeListener;
 import com.github.piasy.biv.utils.IOUtils;
 import com.github.piasy.biv.utils.ThreadedCallbacks;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 /**
  * Created by Piasy{github.com/Piasy} on 06/11/2016.
@@ -113,6 +117,7 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
     private File mCurrentImageFile;
     private Uri mUri;
     private Uri mThumbnail;
+    private HashMap<String, String> mHeaders;
 
     private OnClickListener mOnClickListener;
     private OnLongClickListener mOnLongClickListener;
@@ -326,13 +331,13 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
                 ContentResolver resolver = getContext().getContentResolver();
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME,
-                    mCurrentImageFile.getName());
+                        mCurrentImageFile.getName());
                 // this mime type doesn't really matter, so we just use jpg.
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg");
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH,
-                    Environment.DIRECTORY_PICTURES);
+                        Environment.DIRECTORY_PICTURES);
                 imageUri =
-                    resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+                        resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
 
                 if (imageUri != null) {
                     outputStream = resolver.openOutputStream(imageUri);
@@ -342,7 +347,7 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
                     saved = true;
                 } else {
                     fireSaveImageCallback(null, new RuntimeException(
-                        "saveImageIntoGallery fail: insert to MediaStore error"));
+                            "saveImageIntoGallery fail: insert to MediaStore error"));
                 }
             } catch (IOException e) {
                 fireSaveImageCallback(null, e);
@@ -356,12 +361,12 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
         } else {
             try {
                 String result =
-                    MediaStore.Images.Media.insertImage(
-                        getContext().getContentResolver(),
-                        mCurrentImageFile.getAbsolutePath(),
-                        mCurrentImageFile.getName(),
-                        ""
-                    );
+                        MediaStore.Images.Media.insertImage(
+                                getContext().getContentResolver(),
+                                mCurrentImageFile.getAbsolutePath(),
+                                mCurrentImageFile.getName(),
+                                ""
+                        );
                 fireSaveImageCallback(result, null);
             } catch (IOException e) {
                 fireSaveImageCallback(null, e);
@@ -374,7 +379,8 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
         final ImageSaveCallback imageSaveCallback = mImageSaveCallback;
         if (imageSaveCallback != null) {
             mUiHandler.post(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     if (error != null) {
                         imageSaveCallback.onFail(error);
                     } else {
@@ -397,22 +403,29 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
     }
 
     public void showImage(final Uri thumbnail, final Uri uri) {
-        showImage(thumbnail, uri, false);
+        showImage(thumbnail, uri, new HashMap<String, String>());
     }
 
     public void showImage(final Uri thumbnail, final Uri uri,
-            final boolean delayMainImageForTransition) {
+                          final HashMap<String, String> headers) {
+        showImage(thumbnail, uri, headers, false);
+    }
+
+    public void showImage(final Uri thumbnail, final Uri uri,
+                          final HashMap<String, String> headers,
+                          final boolean delayMainImageForTransition) {
         mThumbnail = thumbnail;
         mUri = uri;
+        mHeaders = headers;
 
         clearThumbnailAndProgressIndicator();
 
         mDelayMainImageForTransition = delayMainImageForTransition;
         if (mDelayMainImageForTransition) {
             BigImageViewer.prefetch(uri);
-            mImageLoader.loadImage(hashCode(), thumbnail, mInternalCallback);
+            mImageLoader.loadImage(hashCode(), thumbnail, headers, mInternalCallback);
         } else {
-            mImageLoader.loadImage(hashCode(), uri, mInternalCallback);
+            mImageLoader.loadImage(hashCode(), uri, headers, mInternalCallback);
         }
 
         if (mFailureImageView != null) {
@@ -422,7 +435,7 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
 
     public void loadMainImageNow() {
         mDelayMainImageForTransition = false;
-        mImageLoader.loadImage(hashCode(), mUri, mInternalCallback);
+        mImageLoader.loadImage(hashCode(), mUri, mHeaders, mInternalCallback);
     }
 
     public void cancel() {
@@ -575,7 +588,7 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
 
     @UiThread
     private void doShowImage(final int imageType, final File image,
-            final boolean useThumbnailView) {
+                             final boolean useThumbnailView) {
         if (useThumbnailView) {
             if (mThumbnailView != null) {
                 removeView(mThumbnailView);
@@ -605,7 +618,7 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
             mMainView = mViewFactory.createMainView(getContext(), imageType, mInitScaleType);
             if (mMainView == null) {
                 onFail(new RuntimeException("Image type not supported: "
-                                            + ImageInfoExtractor.typeName(imageType)));
+                        + ImageInfoExtractor.typeName(imageType)));
                 return;
             }
 

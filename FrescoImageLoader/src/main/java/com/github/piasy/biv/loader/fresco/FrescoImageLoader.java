@@ -27,6 +27,7 @@ package com.github.piasy.biv.loader.fresco;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
+
 import com.facebook.binaryresource.FileBinaryResource;
 import com.facebook.cache.common.CacheKey;
 import com.facebook.cache.disk.FileCache;
@@ -43,6 +44,7 @@ import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.metadata.ImageInfoExtractor;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,7 +88,7 @@ public final class FrescoImageLoader implements ImageLoader {
 
     @SuppressLint("WrongThread")
     @Override
-    public void loadImage(final int requestId, Uri uri, final Callback callback) {
+    public void loadImage(final int requestId, Uri uri, HashMap<String, String> headers, final Callback callback) {
         ImageRequest request = ImageRequest.fromUri(uri);
 
         final File localCache = getCacheFile(request);
@@ -132,7 +134,7 @@ public final class FrescoImageLoader implements ImageLoader {
     }
 
     @Override
-    public void prefetch(Uri uri) {
+    public void prefetch(Uri uri, HashMap<String, String> headers) {
         ImagePipeline pipeline = Fresco.getImagePipeline();
         pipeline.prefetchToDiskCache(ImageRequest.fromUri(uri),
                 false); // we don't need context, but avoid null

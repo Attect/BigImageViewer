@@ -25,11 +25,14 @@
 package com.github.piasy.biv;
 
 import android.net.Uri;
+
 import com.github.piasy.biv.loader.ImageLoader;
+
+import java.util.HashMap;
 
 /**
  * Created by Piasy{github.com/Piasy} on 06/11/2016.
- *
+ * <p>
  * This is not a singleton, you can initialize it multiple times, but before you initialize it
  * again, it will use the same {@link ImageLoader} globally.
  */
@@ -55,13 +58,17 @@ public final class BigImageViewer {
     }
 
     public static void prefetch(Uri... uris) {
+        prefetch(new HashMap<String, String>(), uris);
+    }
+
+    public static void prefetch(HashMap<String, String> headers, Uri... uris) {
         if (uris == null) {
             return;
         }
 
         ImageLoader imageLoader = imageLoader();
         for (Uri uri : uris) {
-            imageLoader.prefetch(uri);
+            imageLoader.prefetch(uri, headers);
         }
     }
 }
