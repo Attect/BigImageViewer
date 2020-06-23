@@ -450,6 +450,11 @@ public class BigImageView extends FrameLayout implements ImageLoader.Callback {
         return mSSIV;
     }
 
+    public boolean hasImage() {
+        if (mSSIV != null) return mSSIV.hasImage();
+        return (mMainView != null);
+    }
+
     @Override
     public void onCacheHit(final int imageType, final File image) {
         mCurrentImageFile = image;
